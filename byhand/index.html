@@ -1,0 +1,47 @@
+<html>
+    <style>
+        input {
+            display: block;
+            margin-top: 0.25cm;
+        }
+    </style>
+    <form action="#" onsubmit="on_click()">
+        <input type="number" id="a" autofocus/>
+        <input type="number" id="b"/>
+        <input type="submit"/>
+    </form>
+
+    <script>
+        function print_result(result) {
+            console.log("DONE WITH CALL");
+            console.log(result);
+        }
+
+        function on_click() {
+            var memory = new WebAssembly.Memory({initial:1, maximum:1});
+            new Uint32Array(memory.buffer)[0] = 42;
+
+            var a = parseInt(document.getElementById("a").value);
+            var b = parseInt(document.getElementById("b").value);
+            console.log(JSON.stringify({a: a, b: b}));
+
+            // prepare imports for the WASM module, and invoke
+            var importObject = {imports: {
+                notifyDone: arg => console.log(arg),
+                iomem: memory
+            }};
+            WebAssembly.instantiateStreaming(fetch('the_answer.wasm'), importObject)
+            .then(obj => {
+                // Call an exported function
+                console.log(obj.instance.exports.add2nums(a, b));
+
+                // // or access the buffer contents of an exported memory:
+                // var i32 = new Uint32Array(obj.instance.exports.memory.buffer);
+
+                // // or access the elements of an exported table:
+                // var table = obj.instance.exports.table;
+                // console.log(table.get(0)());
+            });
+        }
+    </script>
+</html>

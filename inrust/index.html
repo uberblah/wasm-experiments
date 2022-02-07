@@ -1,0 +1,52 @@
+<html>
+    <style>
+        input {
+            display: block;
+            margin-top: 0.25cm;
+        }
+    </style>
+    <form action="#" onsubmit="on_click()">
+        <input type="number" id="a" autofocus/>
+        <input type="number" id="b"/>
+        <input type="submit"/>
+    </form>
+
+    <script>
+        function print_result(result) {
+            console.log("DONE WITH CALL");
+            console.log(result);
+        }
+
+        function on_click() {
+            var a = parseInt(document.getElementById("a").value);
+            var b = parseInt(document.getElementById("b").value);
+            console.log(JSON.stringify({a: a, b: b}));
+
+            // prepare imports for the WASM module, and invoke
+            var importObject = {env: {
+                // the module will invoke this call back with some computation results
+                notifyDone: arg => console.log(arg)
+            }};
+            WebAssembly.instantiateStreaming(fetch('target/wasm32-unknown-unknown/debug/inrust.wasm'), importObject)
+            .then(obj => {
+                // locate the buffer the module will use to receive and return data
+                var xchgAddr = obj.instance.exports.XCHG_BUF.value;
+                // turn it into an addressible array of bytes
+                var xchg = new Uint8Array(obj.instance.exports.memory.buffer);
+                xchg[xchgAddr] = 42; // write a hardcoded value the module will use
+                console.log(obj.instance.exports.add_2_nums(a, b)); // call a method exported by the module
+                console.log(xchg[xchgAddr + 1]); // read back a value written to memory by the module
+
+                console.log(xchgAddr);
+                console.log(obj.instance.exports);
+
+                // // or access the buffer contents of an exported memory:
+                // var i32 = new Uint32Array(obj.instance.exports.memory.buffer);
+
+                // // or access the elements of an exported table:
+                // var table = obj.instance.exports.table;
+                // console.log(table.get(0)());
+            });
+        }
+    </script>
+</html>
