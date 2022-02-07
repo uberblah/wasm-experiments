@@ -17,14 +17,6 @@ extern "C" {
 pub static mut XCHG_BUF: [u8; 2] = [0; 2];
 
 /**
- * We need a way to tell the runtime where our static buffer is.
- */
-#[no_mangle]
-pub unsafe fn get_xchg() -> i32 {
-    XCHG_BUF.as_mut_ptr() as i32
-}
-
-/**
  * Add the two numbers, let the caller know about it,
  * and then grab the value they sent us in the IO buffer.
  * 
