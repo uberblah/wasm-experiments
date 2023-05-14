@@ -1,6 +1,6 @@
 /**
  * This is how we declare imported methods in Rust's WASM unknown target.
- * 
+ *
  * Note that imported and exported methods must only accept and return values
  * which can be hidden behind an i32 representation.
  */
@@ -19,7 +19,7 @@ pub static mut XCHG_BUF: [u8; 2] = [0; 2];
 /**
  * Add the two numbers, let the caller know about it,
  * and then grab the value they sent us in the IO buffer.
- * 
+ *
  * In a real application we might pass encoded data structures
  * in the IO buffer, both as input and output to our functions.
  */
